@@ -1,12 +1,14 @@
 import express, { Application } from "express";
 import db from "./config/db";
 import { mainApp } from "./mainApp";
+import dotenv from "dotenv"
+dotenv.config()
 
 const app : Application = express()
-const port  : number = 5689
+const port = parseInt(process.env.PORT!)
 
 mainApp(app)
-const server = app.listen(port, ()=>{
+const server = app.listen(process.env.PORT || port, ()=>{
     db()
 })
 
