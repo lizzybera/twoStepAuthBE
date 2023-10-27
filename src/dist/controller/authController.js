@@ -90,14 +90,17 @@ const Otp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         });
         const user = yield authModel_1.default.findById(userID);
-        const tokenID = jsonwebtoken_1.default.sign({ id: userID }, "secret");
-        (0, emails_1.verifyMail)(user, tokenID);
         if (user) {
             if ((user === null || user === void 0 ? void 0 : user.otp) === otp) {
-                const user = yield authModel_1.default.findByIdAndUpdate(userID, { secret: true }, { new: true });
+                const secret = yield authModel_1.default.findByIdAndUpdate(userID, { secret: true }, { new: true });
+                const tokenID = jsonwebtoken_1.default.sign({ id: secret === null || secret === void 0 ? void 0 : secret._id }, "secret");
+                (0, emails_1.verifyMail)(secret, tokenID).then(() => {
+                    console.log("done");
+                });
                 return res.status(201).json({
                     message: "please proceed to verify",
-                    data: user
+                    data: secret,
+                    tokenID
                 });
             }
             else {

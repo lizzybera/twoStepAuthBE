@@ -79,28 +79,32 @@ export const Otp = async(req : Request, res : Response ) =>{
         const {token} = req.params
         const {otp} = req.body
 
-        const userID : any = jwt.verify(token, "secret", (err, payload : any)=>{
+        const userID = jwt.verify(token, "secret", (err, payload : any)=>{
             if(err){
                 return err
             }else{
                 return payload.id
             }
         })
+      
 
         const user = await authModel.findById(userID)
 
-       const tokenID = jwt.sign({id : userID}, "secret")
-
-       verifyMail(user, tokenID)
 
         if (user) {
             if(user?.otp === otp){
-
-                const user = await authModel.findByIdAndUpdate(userID, {secret : true}, {new : true})
+                const secret = await authModel.findByIdAndUpdate(userID, {secret : true}, {new : true})
                 
+                const tokenID = jwt.sign({id : secret?._id}, "secret")
+
+                verifyMail(secret, tokenID).then(()=>{
+                    console.log("done");
+                   })
+
                 return res.status(201).json({
                 message : "please proceed to verify",
-                data : user
+                data : secret,
+                tokenID
             })
     
             }else{
